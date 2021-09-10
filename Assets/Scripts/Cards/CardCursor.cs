@@ -27,7 +27,7 @@ namespace Cards
 
         [SerializeField] private Color acceptPositiveColorCursor;
         [SerializeField] private Color acceptNegativeColorCursor;
-
+        private Camera mainCamera;
 
         public void DisableLine()
         {
@@ -37,6 +37,8 @@ namespace Cards
         
         private void Start()
         {
+            mainCamera = Camera.main;
+            
             lineRendererObj = GameObject.Find("CursorLineRenderer");
             lineRenderer = lineRendererObj.GetComponent<LineRenderer>();
             lineRenderer.enabled = true;
@@ -53,7 +55,7 @@ namespace Cards
         private void Update()
         {
             var curMousePos = Input.mousePosition;
-            Ray ray = Camera.main.ScreenPointToRay(curMousePos);
+            Ray ray = mainCamera.ScreenPointToRay(curMousePos);
             if (Physics.Raycast(ray, out RaycastHit raycastHit))
             {
                 pointEnd = raycastHit.point;

@@ -27,7 +27,6 @@ public class SessionManager : MonoBehaviour
         // list 1 - creatures.
         // list 2 - active cards.
         // Here is kind of fake of it.
-        var activeList = new List<int>();
         var playerDeck = new CardDeck();
         for (var i = 0; i < 20; i++)
         {
@@ -41,9 +40,24 @@ public class SessionManager : MonoBehaviour
             var cardData = cardPool.GetCardCreatureData(uid);
             playerDeck.cardCreatureList.Add(cardData);
         }
-
+        // Now let's fake opponent's cards
+        var enemyDeck = new CardDeck();
+        for (var i = 0; i < 20; i++)
+        {
+            var uid = Random.Range(1, 6);
+            var cardData = cardPool.GetCardActiveData(uid);
+            enemyDeck.cardActiveList.Add(cardData);
+        }
+        for (var i = 0; i < 6; i++)
+        {
+            var uid = Random.Range(7, 12);
+            var cardData = cardPool.GetCardCreatureData(uid);
+            enemyDeck.cardCreatureList.Add(cardData);
+        }
+        
+        enemyDeck.PrepareCardQueue();
         playerDeck.PrepareCardQueue();
-        cardsManipulationHandler.SetCardDeck(playerDeck);
+        cardsManipulationHandler.SetCardDeck(playerDeck,enemyDeck);
     }
 
    

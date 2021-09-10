@@ -12,23 +12,32 @@ namespace Cards
         #region Parameters
         [SerializeField] private GameObject cardActiveObjectPref;
         [SerializeField] private GameObject cardCreatureObjectPref;
-        public Transform playerCardZone;
-        public Transform playerCardZoneSpawnPoint;
-        public Transform playerPlayZone;
-        public Transform playerPlayZoneSpawnPoint;
+        [SerializeField] private GameObject cardEnemyHandObjectPref;
+        [SerializeField] private Transform playerCardZone;
+        [SerializeField] private Transform playerCardZoneSpawnPoint;
+        [SerializeField] private RectTransform playerPlayZone;
+        [SerializeField] private Transform playerPlayZoneSpawnPoint;
+        [SerializeField] private RectTransform enemyPlayZone;
+        [SerializeField] private Transform enemyPlayZoneSpawnPoint;
+        [SerializeField] private RectTransform enemyHandZone;
+        [SerializeField] private Transform enemyHandZoneSpawnPoint;
+
         public float spacingDistance;
         public float spacingAngle;
         public float rotationAngleDefault;
         [SerializeField] private GameObject cardCursorLinePref;
-        public CardData creatureData;
         #endregion
         [SerializeField] private Camera mainCamera;
 
         [SerializeField] private Text playerDeckAmount;
+        [SerializeField] private Text enemyDeckAmount;
         private readonly List<CardObj> cardList = new List<CardObj>();  // List of card currently on the whole desk
         private readonly List<CardObjActive> cardHandList = new List<CardObjActive>();  // Cards in Player's Hand
-        private readonly List<CardObj> cardPlayerList = new List<CardObj>();  // Cards in Player Play zone list
+        private readonly List<CardObjCreature> cardPlayerList = new List<CardObjCreature>();  // Cards in Player Play zone list
+        private readonly List<CardObjActive> cardEnemyHandList = new List<CardObjActive>();  // Cards in Player's Hand
+        private readonly List<CardObjCreature> cardEnemyPlayList = new List<CardObjCreature>();  // Cards in Enemy's play zone list
         private CardDeck cardDeck;  // Card deck for current game session
+        private CardDeck enemyCardDeck; // Card deck of player's opponent
         
         #region CardPointerAndSelection
         private CardCursor cardCursor;
@@ -208,9 +217,10 @@ namespace Cards
         }
         
         
-        public void SetCardDeck(CardDeck deck)
+        public void SetCardDeck(CardDeck playerDeck, CardDeck enemyDeck)
         {
-            cardDeck = deck;
+            cardDeck = playerDeck;
+            enemyCardDeck = enemyDeck;
             playerDeckAmount.text = cardDeck.AmountCardsInDeck().ToString();
         }
 
@@ -220,14 +230,22 @@ namespace Cards
             {
                 AddCardToHand();
             }
-
             foreach (var cData in cardDeck.cardCreatureList)
             {
                 AddCardToPlayerPlayZone(cData);
             }
-            
+
+            for (var i = 0; i < 5; i++)
+            {
+                AddCardToEnemyHand();
+            }
+            foreach (var cData in enemyCardDeck.cardCreatureList)
+            {
+                AddCardToEnemyPlayZone(cData);
+            }
         }
 
+        #region AddRemoveCard and Redraw Operations
         private void RemoveCardFromPlayerHand(int id)
         {
             var cardObj = cardList[id];
@@ -238,7 +256,7 @@ namespace Cards
             {
                 cardHandList[i].cardIdInLocation = i;
             }
-            ReDrawCardsInHand();
+            ReDrawCardsInHand(CardLocationType.PlayerHand);
         }
         
         private void AddCardToHand()
@@ -253,34 +271,51 @@ namespace Cards
             var cardInfo = cardDeck.TakeCardFromUp();
             cardObj.SetCardData(cardInfo);
             playerDeckAmount.text = cardDeck.AmountCardsInDeck().ToString();
-            ReDrawCardsInHand();
+            ReDrawCardsInHand(CardLocationType.PlayerHand);
         }
-        private void ReDrawCardsInHand()
+        private void ReDrawCardsInHand(CardLocationType locationType)
         {
+            List<CardObjActive> handList;
+            float leftAngle, rightAngle, angleDefault;
+            int angleKoef;
+            Vector3 spawnPointPos;
+            if (locationType == CardLocationType.PlayerHand)
+            {
+                spawnPointPos = playerCardZoneSpawnPoint.localPosition;
+                handList = cardHandList;
+                leftAngle = (spacingAngle + 180) * Mathf.Deg2Rad;
+                rightAngle = (spacingAngle * -1) * Mathf.Deg2Rad;
+                angleKoef = 1;
+            }
+            else
+            {
+                spawnPointPos = enemyHandZoneSpawnPoint.localPosition;
+                handList = cardEnemyHandList;
+                leftAngle = (180 - spacingAngle) * Mathf.Deg2Rad;
+                rightAngle = (spacingAngle) * Mathf.Deg2Rad;
+                angleKoef = -1;
+            }
             // Calculate new default position for a card
-            var spawnPointPos = playerCardZoneSpawnPoint.localPosition;
-            var amount = cardHandList.Count;
+            var amount = handList.Count;
             int amountHalf = amount / 2;
             var addHalf = 0;
             if (amount % 2 == 1)
             {
                 // Amount is odd. Middle card, should be in the center
-                cardHandList[amountHalf].SetCardPosition(spawnPointPos,Quaternion.Euler(0,0,0) );
+                handList[amountHalf].SetCardPosition(spawnPointPos,Quaternion.Euler(0,0,0) );
                 addHalf = 1;
             }
 
             float rotationAngle = 0;
             var radiusCommon = spacingDistance * (Mathf.Cos(spacingAngle * Mathf.Deg2Rad));
-            var leftAngle = (spacingAngle + 180) * Mathf.Deg2Rad;
-            var rightAngle = (spacingAngle * -1) * Mathf.Deg2Rad;
             // Left side
             for (var i = amountHalf - 1; i >=0; i--)
             {
                 var radius = radiusCommon * (amountHalf - i);
                 var x = radius * Mathf.Cos(leftAngle) + spawnPointPos.x;
                 var y = radius * Mathf.Sin(leftAngle) + spawnPointPos.y;
-                rotationAngle = rotationAngleDefault + amountHalf - i;
-                cardHandList[i].SetCardPosition(new Vector3(x, y, 0),Quaternion.Euler(0,0,rotationAngle) );
+                rotationAngle = angleKoef * (rotationAngleDefault + amountHalf - i);
+                handList[i].SetCardPosition(new Vector3(x, y, 0),Quaternion.Euler(0,0,rotationAngle) );
             }
             // Right side
             for (var i = amountHalf+ addHalf; i < amount; i++)
@@ -288,8 +323,8 @@ namespace Cards
                 var radius = radiusCommon * (i - amountHalf);
                 var x = radius * Mathf.Cos(rightAngle) + spawnPointPos.x;
                 var y = radius * Mathf.Sin(rightAngle) + spawnPointPos.y;
-                rotationAngle = rotationAngleDefault + i - amountHalf;
-                cardHandList[i].SetCardPosition(new Vector3(x, y, 0),Quaternion.Euler(0,0,-rotationAngle) );
+                rotationAngle = angleKoef * (rotationAngleDefault + i - amountHalf);
+                handList[i].SetCardPosition(new Vector3(x, y, 0),Quaternion.Euler(0,0,-rotationAngle) );
             }
         }
         private void AddCardToPlayerPlayZone(CardDataCreature data)
@@ -304,8 +339,7 @@ namespace Cards
         }
         private void RedrawCardsInPlayerZone()
         {
-            var rect = playerPlayZone.gameObject.GetComponent<RectTransform>();
-            var width = rect.rect.width;
+            var width = playerPlayZone.rect.width;
             var leftPosX = -(width / 2);
             var spacingSize = width / (cardPlayerList.Count + 1);
             var spacingSizeCounter = spacingSize;
@@ -316,7 +350,44 @@ namespace Cards
                 spacingSizeCounter += spacingSize;
             }
         }
-
+        private void AddCardToEnemyHand()
+        {
+            // Create object
+            var card = Instantiate(cardEnemyHandObjectPref, enemyHandZoneSpawnPoint.position, Quaternion.identity);
+            card.transform.SetParent(enemyHandZone);
+            var cardObj = card.GetComponent<CardObjActive>();
+            AttachCardToEnemyList(cardObj);
+            cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp); // attach pointers to card
+            // Take data
+            var cardInfo = enemyCardDeck.TakeCardFromUp();
+            cardObj.SetCardData(cardInfo);
+            enemyDeckAmount.text = enemyCardDeck.AmountCardsInDeck().ToString();
+            ReDrawCardsInHand(CardLocationType.EnemyHand);
+        }
+        private void AddCardToEnemyPlayZone(CardDataCreature data)
+        {
+            var card = Instantiate(cardCreatureObjectPref, enemyPlayZoneSpawnPoint.position, Quaternion.identity);
+            card.transform.SetParent(enemyPlayZone);
+            var cardObj = card.GetComponent<CardObjCreature>();
+            AttachCardToEnemyList(cardObj); // give unique id in the session and attach also to required list
+            cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
+            cardObj.SetCardData(data);
+            RedrawCardsInEnemyZone();
+        }
+        private void RedrawCardsInEnemyZone()
+        {
+            var width = enemyPlayZone.rect.width;
+            var leftPosX = -(width / 2);
+            var spacingSize = width / (cardPlayerList.Count + 1);
+            var spacingSizeCounter = spacingSize;
+            foreach (var cardObj in cardEnemyPlayList)
+            {
+                var pos = new Vector3(leftPosX + spacingSizeCounter, enemyPlayZoneSpawnPoint.localPosition.y, 0);
+                cardObj.transform.localPosition = pos;
+                spacingSizeCounter += spacingSize;
+            }
+        }
+        
         private void AttachCardToList(CardObjActive cardObj)
         {
             cardObj.locationType = CardLocationType.PlayerHand;
@@ -333,5 +404,22 @@ namespace Cards
             cardObj.cardIdInLocation = cardPlayerList.Count;
             cardPlayerList.Add(cardObj);
         }
+        private void AttachCardToEnemyList(CardObjActive cardObj)
+        {
+            cardObj.locationType = CardLocationType.EnemyHand;
+            cardObj.cardId = cardList.Count;
+            cardList.Add(cardObj);
+            cardObj.cardIdInLocation = cardEnemyHandList.Count;
+            cardEnemyHandList.Add(cardObj);
+        }
+        private void AttachCardToEnemyList(CardObjCreature cardObj)
+        {
+            cardObj.locationType = CardLocationType.EnemyZone;
+            cardObj.cardId = cardList.Count;
+            cardList.Add(cardObj);
+            cardObj.cardIdInLocation = cardEnemyPlayList.Count;
+            cardEnemyPlayList.Add(cardObj);
+        }
+        #endregion
     }
 }
