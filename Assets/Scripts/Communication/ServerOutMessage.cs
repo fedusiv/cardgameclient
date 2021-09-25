@@ -9,6 +9,7 @@ namespace Communication
     public class ServerOutMessage
     {
         public string MessageString = null;
+        // Login request message builder
         public ServerOutMessage(string login, string password)
         {
             var body = new JSONObject();
@@ -18,7 +19,16 @@ namespace Communication
             jo.Add("type",(int)MessageType.Login);
             jo.Add("body", body);
             MessageString = jo.ToString();
-            Debug.Log(MessageString);
+        }
+
+        // Any request message
+        public ServerOutMessage(MessageType type)
+        {
+            var body = new JSONObject();
+            var jo = new JSONObject();
+            jo.Add("type",(int)type);
+            jo.Add("body", body);
+            MessageString = jo.ToString();
         }
     }
 }

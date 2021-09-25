@@ -18,11 +18,15 @@ public class OperationHandler : MonoBehaviour
 
     private void LoginParse(ServerInMessage msg)
     {
-        if (msg.uuid != null)
+        if (msg.result)
         {
             // Client logged in
             uuid = msg.uuid;    // save uuid
-            SceneManager.LoadScene("MenuScene");    // load main menu scene
+            // Send client data request
+            var dataRequest = new ServerOutMessage(MessageType.ClientData);
+            socketQueue.AddToSendQueue(dataRequest);
+            // load main menu scene
+            SceneManager.LoadScene("MenuScene");
         }
     }
     
@@ -44,6 +48,7 @@ public class OperationHandler : MonoBehaviour
     {
         while (socketQueue.IsReceiveQueueNonEmpty())
         {
+            // Parsing all income operation
             var msg = socketQueue.GetReceiveMessage();
             // got message. Now parse it
             ParseMessages(msg);

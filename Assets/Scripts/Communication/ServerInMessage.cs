@@ -11,6 +11,8 @@ namespace Communication
         
         // Data fields of incoming messages
         public string uuid;
+        public bool result;
+        public string login;
         public ServerInMessage(string message)
         {
             jo = JSON.Parse(message);
@@ -21,6 +23,9 @@ namespace Communication
                 case MessageType.Login:
                     ParseLogin();
                     break;
+                case MessageType.ClientData:
+                    ParseClientData();
+                    break;
                 default:
                     break;
             }
@@ -28,11 +33,20 @@ namespace Communication
         
         private void ParseLogin()
         {
+            result = body["result"].AsBool;
             if (body["result"].AsBool)
             {
                 // Got success on registration
                 uuid = body["uuid"];
             }
+        }
+
+        private void ParseClientData()
+        {
+            login = body["login"].Value;
+            var cards = body["cards"].AsObject;
+            Debug.Log(cards);
+            Debug.Log(cards["1"].AsInt);
         }
     }
 }
