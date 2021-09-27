@@ -221,7 +221,7 @@ namespace Cards
         {
             cardDeck = playerDeck;
             enemyCardDeck = enemyDeck;
-            playerDeckAmount.text = cardDeck.AmountCardsInDeck().ToString();
+            playerDeckAmount.text = cardDeck.AmountCardsInDeckQueue().ToString();
         }
 
         public void PrepareDeskToStart()
@@ -270,7 +270,7 @@ namespace Cards
             // Take data
             var cardInfo = cardDeck.TakeCardFromUp();
             cardObj.SetCardData(cardInfo);
-            playerDeckAmount.text = cardDeck.AmountCardsInDeck().ToString();
+            playerDeckAmount.text = cardDeck.AmountCardsInDeckQueue().ToString();
             ReDrawCardsInHand(CardLocationType.PlayerHand);
         }
         private void ReDrawCardsInHand(CardLocationType locationType)
@@ -361,7 +361,7 @@ namespace Cards
             // Take data
             var cardInfo = enemyCardDeck.TakeCardFromUp();
             cardObj.SetCardData(cardInfo);
-            enemyDeckAmount.text = enemyCardDeck.AmountCardsInDeck().ToString();
+            enemyDeckAmount.text = enemyCardDeck.AmountCardsInDeckQueue().ToString();
             ReDrawCardsInHand(CardLocationType.EnemyHand);
         }
         private void AddCardToEnemyPlayZone(CardDataCreature data)

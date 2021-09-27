@@ -22,9 +22,14 @@ namespace Cards
             return cardQueue.Dequeue();
         }
 
-        public int AmountCardsInDeck()
+        public int AmountCardsInDeckQueue()
         {
             return cardQueue.Count;
+        }
+
+        public int AmountCardsInDeck()
+        {
+            return cardActiveList.Count + cardCreatureList.Count;
         }
     }
 }

@@ -43,17 +43,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb01036a89c34a4a9acf2630c26c7045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardActivePool:
-  - {fileID: 11400000, guid: 8fcbfd1ab786b424a9658eedaf26f157, type: 2}
-  - {fileID: 11400000, guid: c9bde5d9d6443d94284f5cc60dadb7b4, type: 2}
-  - {fileID: 11400000, guid: 6a6e2b2ed73c70b44943d15c5bc474c5, type: 2}
-  - {fileID: 11400000, guid: d321b4686cd2194418782282dceb7cec, type: 2}
-  - {fileID: 11400000, guid: 8e286a373ddbbfa4f959f43c6df78324, type: 2}
-  - {fileID: 11400000, guid: 153d57958d4fec449bf38495506418ad, type: 2}
+  cardActivePool: []
   cardCreaturePool:
+  - {fileID: 11400000, guid: e81c6695c29d31348a09be7bc8055a84, type: 2}
   - {fileID: 11400000, guid: 30992277a5fca424aa55c6be86188345, type: 2}
   - {fileID: 11400000, guid: a4e7d1d163e450047971d20086ab9f05, type: 2}
-  - {fileID: 11400000, guid: 507c881896554c74887428462aa4ab00, type: 2}
-  - {fileID: 11400000, guid: 2737d2bb61794bc4b9d2bb1ff44234fb, type: 2}
-  - {fileID: 11400000, guid: 9f01ef35fcb076a4f8e376acac5fceb3, type: 2}
-  - {fileID: 11400000, guid: e81c6695c29d31348a09be7bc8055a84, type: 2}

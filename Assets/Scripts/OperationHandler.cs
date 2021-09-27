@@ -51,7 +51,6 @@ public class OperationHandler : MonoBehaviour
         clientData.UpdateClientData(msg.login, msg.cardDictionary);
         var deck = cardPool.CreatePlayerCardDeck(clientData.cardInfoDictionary);
         clientData.UpdateClientFullCardDeck(deck);
-        Debug.Log(clientData.clientFullDeck.AmountCardsInDeck());
     }
 
 

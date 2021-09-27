@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: Skeleton
+  m_Name: 3_Askola
   m_EditorClassIdentifier: Assembly-CSharp:Cards:CardScrObjCreature
   data:
-    id: 7
-    name: Skeleton
-    price: 5
+    id: 3
+    name: Askola
+    price: 7
     cardType: 0
-    damage: 1
-    health: 5
+    amountInDeck: 0
+    damage: 2
+    health: 10

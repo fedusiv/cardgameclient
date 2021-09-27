@@ -23,7 +23,7 @@ public class LoginMenu : MonoBehaviour
         loginButton.onClick.AddListener(OnLoginClick);
     }
 
-    void OnLoginClick()
+    private void OnLoginClick()
     {
         if (!string.IsNullOrEmpty(loginField.text) && !string.IsNullOrEmpty(passwordField.text))
         {
