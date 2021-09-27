@@ -1,4 +1,6 @@
-﻿using SimpleJSON;
+﻿using System;
+using System.Collections.Generic;
+using SimpleJSON;
 using UnityEngine;
 
 namespace Communication
@@ -12,7 +14,12 @@ namespace Communication
         // Data fields of incoming messages
         public string uuid;
         public bool result;
+
+        #region ClientData
         public string login;
+        public Dictionary<int, int> cardDictionary;
+        #endregion
+
         public ServerInMessage(string message)
         {
             jo = JSON.Parse(message);
@@ -45,8 +52,13 @@ namespace Communication
         {
             login = body["login"].Value;
             var cards = body["cards"].AsObject;
-            Debug.Log(cards);
-            Debug.Log(cards["1"].AsInt);
+            // Convert json object to dictionary of int int, which can be easily operable inside c#
+            var cardDict = new Dictionary<int, int>();
+            foreach (var key in cards.Keys)
+            {
+                cardDict.Add(int.Parse(key), cards[key].AsInt);
+            }
+            cardDictionary = cardDict;
         }
     }
 }

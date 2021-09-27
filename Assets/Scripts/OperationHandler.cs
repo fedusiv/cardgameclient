@@ -1,13 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using Cards;
 using Communication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class OperationHandler : MonoBehaviour
 {
+    [SerializeField] private CardPool cardPoolPref; // prefab for cardPool
+    private CardPool cardPool;  // cardPool object, that will be spawned
     private WebSocketQueue socketQueue;
-    private string uuid = "";
+    
+    private ClientData clientData;
+    private bool isClientReceiveData = false;
     
     void Start()
     {
@@ -21,15 +27,33 @@ public class OperationHandler : MonoBehaviour
         if (msg.result)
         {
             // Client logged in
-            uuid = msg.uuid;    // save uuid
+            clientData = new ClientData(msg.uuid); // create client's data information
             // Send client data request
             var dataRequest = new ServerOutMessage(MessageType.ClientData);
             socketQueue.AddToSendQueue(dataRequest);
-            // load main menu scene
-            SceneManager.LoadScene("MenuScene");
         }
     }
-    
+
+    // Provide required operation when client's data came
+    private void ClientDataParse(ServerInMessage msg)
+    {
+        if (!isClientReceiveData)
+        {
+            // better to operate with everything once we received client data. Means we sent second message
+            isClientReceiveData = true;
+            // First operate with cards and card pool.
+            // Instantiate card pool
+            cardPool = Instantiate(cardPoolPref, transform.position, Quaternion.identity);
+            // Move to loading Main Menu
+            SceneManager.LoadScene("MenuScene");
+        }
+        // if data already received, just update already existing information
+        clientData.UpdateClientData(msg.login, msg.cardDictionary);
+        var deck = cardPool.CreatePlayerCardDeck(clientData.cardInfoDictionary);
+        clientData.UpdateClientFullCardDeck(deck);
+        Debug.Log(clientData.clientFullDeck.AmountCardsInDeck());
+    }
+
 
     private void ParseMessages(ServerInMessage msg)
     {
@@ -37,6 +61,9 @@ public class OperationHandler : MonoBehaviour
         {
             case MessageType.Login:
                 LoginParse(msg);
+                break;
+            case MessageType.ClientData:
+                ClientDataParse(msg);
                 break;
             default:
                 break;

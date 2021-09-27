@@ -4,14 +4,16 @@ using System.Collections.Generic;
 using Cards;
 using GameLogic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class SessionManager : MonoBehaviour
 {
     [SerializeField] private CardsManipulationHandler cardsManipulationHandler;
-    [SerializeField] private CardPool cardPool;
+    private CardPool cardPool;
     private void Start()
     {
+        cardPool = GameObject.Find("CardPool").GetComponent<CardPool>();
         InstantiatePlayerDeck();    // Prepare information for card deck
         cardsManipulationHandler.PrepareDeskToStart();  // start
     }

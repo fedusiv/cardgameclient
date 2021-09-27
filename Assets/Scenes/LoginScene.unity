@@ -498,6 +498,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b45fac93c94184cad14984076a751e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardPoolPref: {fileID: 1792636951645965358, guid: 3597b5f004809bd4ea0db280dff30d86,
+    type: 3}
 --- !u!4 &771005982
 Transform:
   m_ObjectHideFlags: 0

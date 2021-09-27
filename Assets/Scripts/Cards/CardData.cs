@@ -9,6 +9,7 @@ namespace Cards
         public string name;
         public int price;
         public CardType cardType;
+        public int amountInDeck;
     }
 
     [Serializable]
