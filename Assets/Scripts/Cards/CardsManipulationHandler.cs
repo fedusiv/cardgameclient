@@ -390,7 +390,7 @@ namespace Cards
         
         private void AttachCardToList(CardObjActive cardObj)
         {
-            cardObj.locationType = CardLocationType.PlayerHand;
+            cardObj.InitStage(CardLocationType.PlayerHand);
             cardObj.cardId = cardList.Count;
             cardList.Add(cardObj);
             cardObj.cardIdInLocation = cardHandList.Count;
@@ -398,7 +398,7 @@ namespace Cards
         }
         private void AttachCardToList(CardObjCreature cardObj)
         {
-            cardObj.locationType = CardLocationType.PlayerZone;
+            cardObj.InitStage(CardLocationType.PlayerZone);
             cardObj.cardId = cardList.Count;
             cardList.Add(cardObj);
             cardObj.cardIdInLocation = cardPlayerList.Count;
@@ -406,7 +406,7 @@ namespace Cards
         }
         private void AttachCardToEnemyList(CardObjActive cardObj)
         {
-            cardObj.locationType = CardLocationType.EnemyHand;
+            cardObj.InitStage(CardLocationType.EnemyHand);
             cardObj.cardId = cardList.Count;
             cardList.Add(cardObj);
             cardObj.cardIdInLocation = cardEnemyHandList.Count;
@@ -414,7 +414,7 @@ namespace Cards
         }
         private void AttachCardToEnemyList(CardObjCreature cardObj)
         {
-            cardObj.locationType = CardLocationType.EnemyZone;
+            cardObj.InitStage(CardLocationType.EnemyZone);
             cardObj.cardId = cardList.Count;
             cardList.Add(cardObj);
             cardObj.cardIdInLocation = cardEnemyPlayList.Count;

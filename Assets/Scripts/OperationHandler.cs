@@ -14,6 +14,8 @@ public class OperationHandler : MonoBehaviour
     
     private ClientData clientData;
     private bool isClientReceiveData = false;
+
+    private MainMenu mainMenu;
     
     void Start()
     {
@@ -31,6 +33,8 @@ public class OperationHandler : MonoBehaviour
             // Send client data request
             var dataRequest = new ServerOutMessage(MessageType.ClientData);
             socketQueue.AddToSendQueue(dataRequest);
+            // Move to loading Main Menu
+            SceneManager.LoadScene("MenuScene");
         }
     }
 
@@ -44,13 +48,13 @@ public class OperationHandler : MonoBehaviour
             // First operate with cards and card pool.
             // Instantiate card pool
             cardPool = Instantiate(cardPoolPref, transform.position, Quaternion.identity);
-            // Move to loading Main Menu
-            SceneManager.LoadScene("MenuScene");
+            mainMenu = GameObject.Find("MainMenuManager").GetComponent<MainMenu>(); // get required object
         }
         // if data already received, just update already existing information
         clientData.UpdateClientData(msg.login, msg.cardDictionary);
         var deck = cardPool.CreatePlayerCardDeck(clientData.cardInfoDictionary);
         clientData.UpdateClientFullCardDeck(deck);
+        mainMenu.UpdateClientFullDeck(clientData.clientFullDeck);
     }
 
 

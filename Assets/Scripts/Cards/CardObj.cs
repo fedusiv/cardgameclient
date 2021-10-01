@@ -42,6 +42,7 @@ namespace Cards
         #endregion
         #region CardEffects
         [SerializeField] private Image selectionImage;
+        [SerializeField] private Text amountInDeckText;
         #endregion
 
         private Transform graveyardObj;
@@ -70,8 +71,18 @@ namespace Cards
                 enlargeScalePrev.y * enlargeScaleFactor, enlargeScalePrev.z);
             // Enlarge target angle is also always same
             enlargeAngleTarget = Quaternion.Euler(0, 0, 0);
-            // Get graveyard location
-            graveyardObj = GameObject.Find("GraveyardPlace").GetComponent<Transform>();
+        }
+        
+        // Additional method for initialization.
+        // Because card obj handles card in different places
+        public void InitStage(CardLocationType locType)
+        {
+            locationType = locType;
+            if (locationType != CardLocationType.Library)
+            {
+                // Get graveyard location
+                graveyardObj = GameObject.Find("GraveyardPlace").GetComponent<Transform>();
+            }
         }
 
         private void Update()
@@ -83,7 +94,6 @@ namespace Cards
         }
 
         #region CardDataOperations
-
         public virtual void SetCardData(CardDataActive data)
         {
 
@@ -93,6 +103,19 @@ namespace Cards
             cardData = data;
             cardNameUI.text = cardData.name;
             cardPriceUI.text = cardData.price.ToString();
+        }
+        // Draw and represent all necessary staff for displaying to player amount available in deck
+        public void SetAmountInDeck(int amount)
+        {
+            if (amount > 1)
+            {
+                amountInDeckText.text = "x" + amount.ToString();
+                amountInDeckText.enabled = true;
+            }
+            else
+            {
+                amountInDeckText.enabled = false;
+            }
         }
         #endregion
         
@@ -158,6 +181,7 @@ namespace Cards
         PlayerHand,
         PlayerZone,
         EnemyHand,
-        EnemyZone
+        EnemyZone,
+        Library
     }
 }
