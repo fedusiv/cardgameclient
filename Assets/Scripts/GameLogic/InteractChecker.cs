@@ -9,7 +9,7 @@ namespace GameLogic
             // Verify, that cards can interact with each other
             switch (caller)
             {
-                case CardType.Spell:
+                case CardType.Scroll:
                     switch (target)
                     {
                         case CardType.Creature:

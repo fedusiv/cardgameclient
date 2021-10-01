@@ -20,7 +20,7 @@ namespace Cards
             damageTextUI.text = data.damage.ToString();
             switch (data.cardType)
             {
-                case CardType.Spell:
+                case CardType.Scroll:
                     activeTypeImage.sprite = spellTypeImage;
                     break;
                 case CardType.Weapon:

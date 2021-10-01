@@ -6,26 +6,35 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] private Button deckManagerButton;
-    [SerializeField] private GameObject deckManagerMenu;
-    [SerializeField] private GridLayoutGroup deckLibraryGridUI;
-    [SerializeField] private Transform cardsSpawnPoint; // point where cards firstly spawned, and where it's located if is not represented
-    [SerializeField] private CardObjActive cardObjActivePref;
-    [SerializeField] private CardObjCreature cardObjCreaturePref;
-    private bool deckManagerEnabled = false;
-    private CardDeck clientFullDeck;
-    private readonly  List<CardObj> spawnedCardObjects = new List<CardObj>();
-
     #region Pointer handler field
     private readonly CardManipulationEvent cardOnPointerEnter = new CardManipulationEvent();
     private readonly CardManipulationEvent cardOnPointerExit = new CardManipulationEvent();
     private readonly CardManipulationEvent cardOnPointerDown = new CardManipulationEvent();
     private readonly CardManipulationEvent cardOnPointerUp = new CardManipulationEvent();
     #endregion
+    #region CardLibrary
+    [SerializeField] private Button deckManagerButton;
+    [SerializeField] private GameObject deckManagerMenu;
+    [SerializeField] private GridLayoutGroup deckLibraryGridUI;
+    [SerializeField] private Transform cardsSpawnPoint; // point where cards firstly spawned, and where it's located if is not represented
+    [SerializeField] private CardObjActive cardObjActivePref;
+    [SerializeField] private CardObjCreature cardObjCreaturePref;
+    [SerializeField] private Text libraryCurrentPageText;
+    [SerializeField] private Button libraryPrevPageButton;
+    [SerializeField] private Button libraryNextPageButton;
+    private bool deckManagerEnabled = false;
+    private CardDeck clientFullDeck;
+    private readonly  List<CardObj> spawnedCardObjects = new List<CardObj>();
+    private const int amountOfCardOnOnePage = 12;
+    private int currentPageId, amountOfPages;   // page id and amount of all pages for current tab or any other filter stuff
+    private List<CardObj> displayedCards = new List<CardObj>(); // list of cards, which are displayed
+    #endregion
     
     private void Start()
     {
         deckManagerButton.onClick.AddListener(OnDeckManagerButtonClick);
+        libraryPrevPageButton.onClick.AddListener(OnPrevPageButtonClick);
+        libraryNextPageButton.onClick.AddListener(OnNextPageButtonClick);
     }
 
     private void OnDeckManagerButtonClick()
@@ -34,6 +43,8 @@ public class MainMenu : MonoBehaviour
         deckManagerMenu.SetActive(deckManagerEnabled);
         if (deckManagerEnabled)
         {
+            currentPageId = 0;  // Start with zero page Id
+            // operation on enabling deck manager
             FillDeckLibrary();
         }
     }
@@ -47,13 +58,69 @@ public class MainMenu : MonoBehaviour
 
     private void FillDeckLibrary()
     {
-        foreach (var card in spawnedCardObjects)
+        // Get list to proceed
+        var listToOperate = spawnedCardObjects;
+        
+        // Calculate pages amount
+        int modulo = listToOperate.Count % amountOfCardOnOnePage;
+        amountOfPages = listToOperate.Count / amountOfCardOnOnePage;
+        if (modulo > 0)
         {
+            amountOfPages += 1;
+        }
+
+        // Remove previous spawned cards
+        foreach (var card in displayedCards)
+        {
+            card.transform.SetParent(cardsSpawnPoint,false);
+        }
+        displayedCards.Clear();
+
+        // Spawn cards
+        var lastIdToSpawn = (amountOfCardOnOnePage * (currentPageId + 1));
+        var possibleAmountToSpawn = listToOperate.Count - lastIdToSpawn;
+        if (possibleAmountToSpawn < 0)
+        {
+            lastIdToSpawn += possibleAmountToSpawn;
+        }
+        for (int i = (amountOfCardOnOnePage * currentPageId);
+            i < lastIdToSpawn;
+            i++)
+        {
+            var card = listToOperate[i];
             card.transform.SetParent(deckLibraryGridUI.transform);
             card.SetAmountInDeck(card.cardData.amountInDeck);
+            displayedCards.Add(card);
         }
+        
+        // Change library navigation information
+        FillLibraryNavigation();
     }
 
+    private void FillLibraryNavigation()
+    {
+        var humanPageId = currentPageId + 1;
+        libraryCurrentPageText.text = humanPageId.ToString() + "/" + amountOfPages.ToString();
+        if (humanPageId == 1)
+        {
+            libraryPrevPageButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            libraryPrevPageButton.gameObject.SetActive(true);
+        }
+
+        if (humanPageId == amountOfPages)
+        {
+            libraryNextPageButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            libraryNextPageButton.gameObject.SetActive(true);
+        }
+        
+    }
+    
     private void SpawnAllCardObjects()
     {
         foreach (var active in clientFullDeck.cardActiveList)
@@ -74,8 +141,21 @@ public class MainMenu : MonoBehaviour
             obj.cardId = spawnedCardObjects.Count;
             obj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
         }
+        Debug.Log(spawnedCardObjects.Count);
     }
 
+    private void OnNextPageButtonClick()
+    {
+        currentPageId += 1;
+        FillDeckLibrary();
+    }
+
+    private void OnPrevPageButtonClick()
+    {
+        currentPageId -= 1;
+        FillDeckLibrary();
+    }
+    
     #region PointerHandlers
     private void InitEvents()
     {

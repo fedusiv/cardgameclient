@@ -25,7 +25,7 @@ namespace Cards
         [HideInInspector] public CardDataActive cardDataActive;
         [HideInInspector] public CardDataCreature cardDataCreature;
         [HideInInspector] public CardLocationType locationType;
-        [HideInInspector] public int cardId;
+        [HideInInspector] public int cardId;    // id in spawn location
         [HideInInspector] public int cardIdInLocation;
         #endregion
         #region EnlargeFields

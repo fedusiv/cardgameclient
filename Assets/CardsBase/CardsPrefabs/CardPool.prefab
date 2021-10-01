@@ -43,7 +43,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb01036a89c34a4a9acf2630c26c7045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardActivePool: []
+  cardActivePool:
+  - {fileID: 11400000, guid: c099bf2a5b847b74ebad4c4b9ae37811, type: 2}
+  - {fileID: 11400000, guid: a679a065dfa70c44daa1227c69374b6e, type: 2}
+  - {fileID: 11400000, guid: d15b3451e4cfe894a8b8ee7e0f8444c6, type: 2}
+  - {fileID: 11400000, guid: 968e6057be172434ca7c09c219774d63, type: 2}
+  - {fileID: 11400000, guid: f4d950c2a81846d4d85400f245838a78, type: 2}
+  - {fileID: 11400000, guid: 52cd32d718d42ec478268f9bf74b9cd3, type: 2}
   cardCreaturePool:
   - {fileID: 11400000, guid: e81c6695c29d31348a09be7bc8055a84, type: 2}
   - {fileID: 11400000, guid: 30992277a5fca424aa55c6be86188345, type: 2}

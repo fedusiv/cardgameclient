@@ -4,7 +4,9 @@
     {
         Creature,
         Weapon,
-        Spell,
-        Shield
+        Scroll,
+        Shield,
+        Sphere,
+        Armour
     }
 }
