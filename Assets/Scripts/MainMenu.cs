@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cards;
+using UIScripts;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    private OperationsQueue internalQueue;
     #region Pointer handler field
     private readonly CardManipulationEvent cardOnPointerEnter = new CardManipulationEvent();
     private readonly CardManipulationEvent cardOnPointerExit = new CardManipulationEvent();
@@ -29,13 +31,23 @@ public class MainMenu : MonoBehaviour
     private int currentPageId, amountOfPages;   // page id and amount of all pages for current tab or any other filter stuff
     private List<CardObj> displayedCards = new List<CardObj>(); // list of cards, which are displayed
     #endregion
-    
-    private void Start()
+
+    #region DecksLibrary
+    [SerializeField] private Transform decksNamesListTransformPoint; // point where to attach list elements
+    [SerializeField] private GameObject deckElementPref;    // prefab of deck element
+    private List<DeckElement> displayedDeckElements = new List<DeckElement>();    // stores game objects, that was created to represent player's decks
+    #endregion
+
+    private void Awake()
     {
+        internalQueue = OperationsQueue.Instance;
+        var msg = new OperationMessage(OpCodes.MainMenuLoaded);
+        internalQueue.PutIntoQueue(msg);
         deckManagerButton.onClick.AddListener(OnDeckManagerButtonClick);
         libraryPrevPageButton.onClick.AddListener(OnPrevPageButtonClick);
         libraryNextPageButton.onClick.AddListener(OnNextPageButtonClick);
     }
+    
 
     private void OnDeckManagerButtonClick()
     {
@@ -46,6 +58,7 @@ public class MainMenu : MonoBehaviour
             currentPageId = 0;  // Start with zero page Id
             // operation on enabling deck manager
             FillDeckLibrary();
+            FillDeckNames();
         }
     }
 
@@ -97,6 +110,7 @@ public class MainMenu : MonoBehaviour
         FillLibraryNavigation();
     }
 
+    // Print button and page number in library field
     private void FillLibraryNavigation()
     {
         var humanPageId = currentPageId + 1;
@@ -119,6 +133,33 @@ public class MainMenu : MonoBehaviour
             libraryNextPageButton.gameObject.SetActive(true);
         }
         
+    }
+    
+    // Print deck Names of client
+    private void FillDeckNames()
+    {
+        // Remove previous instantiation
+        foreach (var deck in displayedDeckElements)
+        {
+            Destroy(deck.gameObject);
+        }
+        displayedDeckElements.Clear();
+        // Instantiate new decks list
+        var currentId = 0;
+        foreach (var deck in clientFullDeck.decks)
+        {
+            var deckElement = Instantiate(deckElementPref, decksNamesListTransformPoint, false).GetComponent<DeckElement>();
+            deckElement.SetDeckName(deck.name);
+            currentId = displayedDeckElements.Count;
+            deckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(currentId); });
+            displayedDeckElements.Add(deckElement);
+        }
+        // Create additional element to create new deck
+        var newDeckElement = Instantiate(deckElementPref, decksNamesListTransformPoint, false).GetComponent<DeckElement>();
+        newDeckElement.MarkAsCreateNew();
+        currentId = displayedDeckElements.Count;
+        newDeckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(currentId); });
+        displayedDeckElements.Add(newDeckElement);
     }
     
     private void SpawnAllCardObjects()
@@ -154,7 +195,11 @@ public class MainMenu : MonoBehaviour
         currentPageId -= 1;
         FillDeckLibrary();
     }
-    
+
+    private void OnDeckNameButtonPressed(int id)
+    {
+        Debug.Log(id);
+    }
     #region PointerHandlers
     private void InitEvents()
     {

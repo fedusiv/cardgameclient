@@ -11,9 +11,11 @@ public class OperationHandler : MonoBehaviour
     [SerializeField] private CardPool cardPoolPref; // prefab for cardPool
     private CardPool cardPool;  // cardPool object, that will be spawned
     private WebSocketQueue socketQueue;
+    private OperationsQueue operationsQueue;    // queue with internal operations
+    private ServerInMessage clientDataMsg = null;
     
     private ClientData clientData;
-    private bool isClientReceiveData = false;
+    private bool isMainMenuLoaded = false;
 
     private MainMenu mainMenu;
     
@@ -21,6 +23,7 @@ public class OperationHandler : MonoBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         socketQueue = WebSocketQueue.Instance;
+        operationsQueue = OperationsQueue.Instance;
     }
 
 
@@ -41,20 +44,31 @@ public class OperationHandler : MonoBehaviour
     // Provide required operation when client's data came
     private void ClientDataParse(ServerInMessage msg)
     {
-        if (!isClientReceiveData)
+        if (!isMainMenuLoaded)
         {
-            // better to operate with everything once we received client data. Means we sent second message
-            isClientReceiveData = true;
-            // First operate with cards and card pool.
-            // Instantiate card pool
-            cardPool = Instantiate(cardPoolPref, transform.position, Quaternion.identity);
-            mainMenu = GameObject.Find("MainMenuManager").GetComponent<MainMenu>(); // get required object
+            clientDataMsg = msg;
+            return;
         }
         // if data already received, just update already existing information
         clientData.UpdateClientData(msg.login, msg.cardDictionary);
         var deck = cardPool.CreatePlayerCardDeck(clientData.cardInfoDictionary, msg.decksCardDictionary, msg.decksNames);
         clientData.UpdateClientFullCardDeck(deck);
         mainMenu.UpdateClientFullDeck(clientData.clientFullDeck);
+    }
+
+    private void MainMenuLoaded()
+    {   
+        // better to operate with everything once we received client data. Means we sent second message
+        isMainMenuLoaded = true;
+        // First operate with cards and card pool.
+        // Instantiate card pool
+        cardPool = Instantiate(cardPoolPref, transform.position, Quaternion.identity);
+        mainMenu = GameObject.Find("MainMenuManager").GetComponent<MainMenu>(); // get required object
+        if (clientDataMsg != null)
+        {
+            ClientDataParse(clientDataMsg);
+        }
+        
     }
 
 
@@ -72,6 +86,18 @@ public class OperationHandler : MonoBehaviour
                 break;
         }
     }
+
+    private void ParseInternalMessages(OperationMessage msg)
+    {
+        switch (msg.code)
+        {
+            case OpCodes.MainMenuLoaded:
+                MainMenuLoaded();
+                break;
+            default:
+                break;
+        }
+    }
     
     // Update is called once per frame
     void Update()
@@ -82,6 +108,12 @@ public class OperationHandler : MonoBehaviour
             var msg = socketQueue.GetReceiveMessage();
             // got message. Now parse it
             ParseMessages(msg);
+        }
+
+        while (operationsQueue.IfQueueNonEmpty())
+        {
+            var msg = operationsQueue.ReadFromQueue();
+            ParseInternalMessages(msg);
         }
     }
 }
