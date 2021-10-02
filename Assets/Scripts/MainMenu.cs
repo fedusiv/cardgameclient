@@ -141,7 +141,6 @@ public class MainMenu : MonoBehaviour
             obj.cardId = spawnedCardObjects.Count;
             obj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
         }
-        Debug.Log(spawnedCardObjects.Count);
     }
 
     private void OnNextPageButtonClick()

@@ -18,6 +18,8 @@ namespace Communication
         #region ClientData
         public string login;
         public Dictionary<int, int> cardDictionary;
+        public List<Dictionary<int, int>> decksCardDictionary;
+        public List<string> decksNames;
         #endregion
 
         public ServerInMessage(string message)
@@ -59,6 +61,26 @@ namespace Communication
                 cardDict.Add(int.Parse(key), cards[key].AsInt);
             }
             cardDictionary = cardDict;
+            // Obtain player's decks
+            var decks = body["decks"].AsArray;
+            // deck_values and deck names are list, so means id in both list are match
+            List<Dictionary<int, int>> decks_values = new List<Dictionary<int, int>>();
+            List<string> decks_names = new List<string>();
+            foreach (var deck in decks)
+            {
+                var name = deck.Value["name"].Value;
+                var deck_cards = body["cards"].AsObject;
+                var cardDeckDict = new Dictionary<int, int>();
+                foreach (var key in cards.Keys)
+                {
+                    cardDeckDict.Add(int.Parse(key), cards[key].AsInt);
+                }
+                decks_values.Add(cardDeckDict);
+                decks_names.Add(name);
+            }
+            
+            decksCardDictionary = decks_values;
+            decksNames = decks_names;
         }
     }
 }
