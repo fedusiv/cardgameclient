@@ -9,4 +9,10 @@
         Sphere,
         Armour
     }
+
+    public enum DamageType
+    {
+        Physical,
+        Magical
+    }
 }
