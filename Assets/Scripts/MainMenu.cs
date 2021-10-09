@@ -33,9 +33,15 @@ public class MainMenu : MonoBehaviour
     #endregion
 
     #region DecksLibrary
+    // Decks list
     [SerializeField] private Transform decksNamesListTransformPoint; // point where to attach list elements
     [SerializeField] private GameObject deckElementPref;    // prefab of deck element
     private List<DeckElement> displayedDeckElements = new List<DeckElement>();    // stores game objects, that was created to represent player's decks
+    // Cards inside deck
+    private int currentDeckOnEditIndex = -1;
+    [SerializeField] private Transform cardsNamesListInDeckTransfromPoint;  // point where represented cards in decks will be attache
+    [SerializeField] private GameObject cardInDeckElementPref;  // prefab of element which represents card in deck
+    private List<DeckCardElement> displayedCardDeckElements = new List<DeckCardElement>();  // list of represented cards
     #endregion
 
     private void Awake()
@@ -145,21 +151,61 @@ public class MainMenu : MonoBehaviour
         }
         displayedDeckElements.Clear();
         // Instantiate new decks list
-        var currentId = 0;
         foreach (var deck in clientFullDeck.decks)
         {
             var deckElement = Instantiate(deckElementPref, decksNamesListTransformPoint, false).GetComponent<DeckElement>();
             deckElement.SetDeckName(deck.name);
-            currentId = displayedDeckElements.Count;
-            deckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(currentId); });
+            var currentId = displayedDeckElements.Count;
+            deckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(currentId); });   // please be very careful with id, because for callback it's hardcoded here
             displayedDeckElements.Add(deckElement);
         }
         // Create additional element to create new deck
         var newDeckElement = Instantiate(deckElementPref, decksNamesListTransformPoint, false).GetComponent<DeckElement>();
         newDeckElement.MarkAsCreateNew();
-        currentId = displayedDeckElements.Count;
-        newDeckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(currentId); });
+        var newElementId = displayedDeckElements.Count;
+        newDeckElement.button.onClick.AddListener(delegate { OnDeckNameButtonPressed(newElementId); }); // please be very careful with id, because for callback it's hardcoded here
         displayedDeckElements.Add(newDeckElement);
+    }
+
+    // Display, cards in the chosen deck, and allow to make changes
+    private void FillDeckWithCards()
+    {
+        // Remove previous representation of cards
+        foreach (var cardDeck in displayedCardDeckElements)
+        {
+            Destroy(cardDeck.gameObject);
+        }
+        displayedCardDeckElements.Clear();
+        
+        if (clientFullDeck.decks.Count <= currentDeckOnEditIndex)
+        {
+            // This is request to create new deck
+        }
+        else
+        {
+            // Edit already existing deck
+            var deck = clientFullDeck.decks[currentDeckOnEditIndex];    // current deck
+            // Display active card first
+            foreach (var card in deck.cardActiveList)
+            {
+                var cardDeck = Instantiate(cardInDeckElementPref, cardsNamesListInDeckTransfromPoint, false)
+                    .GetComponent<DeckCardElement>();
+                cardDeck.SetCardData(card.name,card.price,card.amountInDeck);
+                var index = displayedCardDeckElements.Count;
+                cardDeck.removeButton.onClick.AddListener(delegate { OnCardInDeckRemoveButtonPressed(index);});
+                displayedCardDeckElements.Add(cardDeck);
+            }
+            // Second creature cards
+            foreach (var card in deck.cardCreatureList)
+            {
+                var cardDeck = Instantiate(cardInDeckElementPref, cardsNamesListInDeckTransfromPoint, false)
+                    .GetComponent<DeckCardElement>();
+                cardDeck.SetCardData(card.name,card.price,card.amountInDeck);
+                var index = displayedCardDeckElements.Count;
+                cardDeck.removeButton.onClick.AddListener(delegate { OnCardInDeckRemoveButtonPressed(index);});
+                displayedCardDeckElements.Add(cardDeck);
+            }
+        }
     }
     
     private void SpawnAllCardObjects()
@@ -198,7 +244,25 @@ public class MainMenu : MonoBehaviour
 
     private void OnDeckNameButtonPressed(int id)
     {
-        Debug.Log(id);
+        if (currentDeckOnEditIndex != id)
+        {
+            // Open new edit deck
+            currentDeckOnEditIndex = id;
+            FillDeckWithCards();
+            displayedDeckElements[currentDeckOnEditIndex].MarkAsInEdit();
+        }
+        else
+        {
+            // Deck is already opened to edit. This button pressed to save
+            displayedDeckElements[currentDeckOnEditIndex].MarkAsSaved();
+            currentDeckOnEditIndex = -1;
+        }
+
+    }
+
+    private void OnCardInDeckRemoveButtonPressed(int id)
+    {
+        Debug.Log("I want to edit card id: " + id);
     }
     #region PointerHandlers
     private void InitEvents()
