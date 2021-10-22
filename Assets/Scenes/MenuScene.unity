@@ -608,9 +608,7 @@ MonoBehaviour:
   deckManagerMenu: {fileID: 286649586}
   deckLibraryGridUI: {fileID: 2025236962}
   cardsSpawnPoint: {fileID: 89125454}
-  cardObjActivePref: {fileID: 6705916602742806914, guid: faaf5dfd8f8930143939f58d4f0de927,
-    type: 3}
-  cardObjCreaturePref: {fileID: 6288426460422520582, guid: 99aef5d96dde8ec48aef212671e2c527,
+  cardObjPref: {fileID: 6288426460422520582, guid: 99aef5d96dde8ec48aef212671e2c527,
     type: 3}
   libraryCurrentPageText: {fileID: 1856605014}
   libraryPrevPageButton: {fileID: 1493015220}

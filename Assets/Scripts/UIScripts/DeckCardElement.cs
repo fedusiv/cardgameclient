@@ -11,10 +11,10 @@ namespace UIScripts
         [SerializeField] private Text cardAmount;
         public Button removeButton;
 
-        public void SetCardData(string name, int price, int amount)
+        public void SetCardData(string name, int cost_mana, int amount)
         {
             cardName.text = name;
-            cardPrice.text = price.ToString();
+            cardPrice.text = cost_mana.ToString();
             if (amount > 1)
             {
                 cardAmount.text = "x" + amount;

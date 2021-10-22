@@ -19,8 +19,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject deckManagerMenu;
     [SerializeField] private GridLayoutGroup deckLibraryGridUI;
     [SerializeField] private Transform cardsSpawnPoint; // point where cards firstly spawned, and where it's located if is not represented
-    [SerializeField] private CardObjActive cardObjActivePref;
-    [SerializeField] private CardObjCreature cardObjCreaturePref;
+    [SerializeField] private CardObj cardObjPref;
     [SerializeField] private Text libraryCurrentPageText;
     [SerializeField] private Button libraryPrevPageButton;
     [SerializeField] private Button libraryNextPageButton;
@@ -186,21 +185,11 @@ public class MainMenu : MonoBehaviour
             // Edit already existing deck
             var deck = clientFullDeck.decks[currentDeckOnEditIndex];    // current deck
             // Display active card first
-            foreach (var card in deck.cardActiveList)
+            foreach (var card in deck.cardDataList)
             {
                 var cardDeck = Instantiate(cardInDeckElementPref, cardsNamesListInDeckTransfromPoint, false)
                     .GetComponent<DeckCardElement>();
-                cardDeck.SetCardData(card.name,card.price,card.amountInDeck);
-                var index = displayedCardDeckElements.Count;
-                cardDeck.removeButton.onClick.AddListener(delegate { OnCardInDeckRemoveButtonPressed(index);});
-                displayedCardDeckElements.Add(cardDeck);
-            }
-            // Second creature cards
-            foreach (var card in deck.cardCreatureList)
-            {
-                var cardDeck = Instantiate(cardInDeckElementPref, cardsNamesListInDeckTransfromPoint, false)
-                    .GetComponent<DeckCardElement>();
-                cardDeck.SetCardData(card.name,card.price,card.amountInDeck);
+                cardDeck.SetCardData(card.name,card.cost_mana,card.amountInDeck);
                 var index = displayedCardDeckElements.Count;
                 cardDeck.removeButton.onClick.AddListener(delegate { OnCardInDeckRemoveButtonPressed(index);});
                 displayedCardDeckElements.Add(cardDeck);
@@ -210,19 +199,10 @@ public class MainMenu : MonoBehaviour
     
     private void SpawnAllCardObjects()
     {
-        foreach (var active in clientFullDeck.cardActiveList)
+        foreach (var card in clientFullDeck.cardDataList)
         {
-            var obj = Instantiate(cardObjActivePref, cardsSpawnPoint, true);
-            obj.SetCardData(active);
-            obj.InitStage(CardLocationType.Library);
-            spawnedCardObjects.Add(obj);
-            obj.cardId = spawnedCardObjects.Count;
-            obj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
-        }
-        foreach (var creature in clientFullDeck.cardCreatureList)
-        {
-            var obj = Instantiate(cardObjCreaturePref, cardsSpawnPoint, true);
-            obj.SetCardData(creature);
+            var obj = Instantiate(cardObjPref, cardsSpawnPoint, true);
+            obj.SetCardData(card);
             obj.InitStage(CardLocationType.Library);
             spawnedCardObjects.Add(obj);
             obj.cardId = spawnedCardObjects.Count;

@@ -32,10 +32,10 @@ namespace Cards
         [SerializeField] private Text playerDeckAmount;
         [SerializeField] private Text enemyDeckAmount;
         private readonly List<CardObj> cardList = new List<CardObj>();  // List of card currently on the whole desk
-        private readonly List<CardObjActive> cardHandList = new List<CardObjActive>();  // Cards in Player's Hand
-        private readonly List<CardObjCreature> cardPlayerList = new List<CardObjCreature>();  // Cards in Player Play zone list
-        private readonly List<CardObjActive> cardEnemyHandList = new List<CardObjActive>();  // Cards in Player's Hand
-        private readonly List<CardObjCreature> cardEnemyPlayList = new List<CardObjCreature>();  // Cards in Enemy's play zone list
+        private readonly List<CardObj> cardHandList = new List<CardObj>();  // Cards in Player's Hand
+        private readonly List<CardObj> cardPlayerList = new List<CardObj>();  // Cards in Player Play zone list
+        private readonly List<CardObj> cardEnemyHandList = new List<CardObj>();  // Cards in Player's Hand
+        private readonly List<CardObj> cardEnemyPlayList = new List<CardObj>();  // Cards in Enemy's play zone list
         private CardDeck cardDeck;  // Card deck for current game session
         private CardDeck enemyCardDeck; // Card deck of player's opponent
         
@@ -230,18 +230,10 @@ namespace Cards
             {
                 AddCardToHand();
             }
-            foreach (var cData in cardDeck.cardCreatureList)
-            {
-                AddCardToPlayerPlayZone(cData);
-            }
 
             for (var i = 0; i < 5; i++)
             {
                 AddCardToEnemyHand();
-            }
-            foreach (var cData in enemyCardDeck.cardCreatureList)
-            {
-                AddCardToEnemyPlayZone(cData);
             }
         }
 
@@ -264,7 +256,7 @@ namespace Cards
             // Create object
             var card = Instantiate(cardActiveObjectPref, playerCardZoneSpawnPoint.position, Quaternion.identity);
             card.transform.SetParent(playerCardZone);
-            var cardObj = card.GetComponent<CardObjActive>();
+            var cardObj = card.GetComponent<CardObj>();
             AttachCardToList(cardObj);
             cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp); // attach pointers to card
             // Take data
@@ -275,7 +267,7 @@ namespace Cards
         }
         private void ReDrawCardsInHand(CardLocationType locationType)
         {
-            List<CardObjActive> handList;
+            List<CardObj> handList;
             float leftAngle, rightAngle, angleDefault;
             int angleKoef;
             Vector3 spawnPointPos;
@@ -327,12 +319,12 @@ namespace Cards
                 handList[i].SetCardPosition(new Vector3(x, y, 0),Quaternion.Euler(0,0,-rotationAngle) );
             }
         }
-        private void AddCardToPlayerPlayZone(CardDataCreature data)
+        private void AddCardToPlayerPlayZone(CardData data)
         {
             var card = Instantiate(cardCreatureObjectPref, playerPlayZoneSpawnPoint.position, Quaternion.identity);
             card.transform.SetParent(playerPlayZone);
-            var cardObj = card.GetComponent<CardObjCreature>();
-            AttachCardToList(cardObj); // give unique id in the session and attach also to required list
+            var cardObj = card.GetComponent<CardObj>();
+            AttachCardToZone(cardObj); // give unique id in the session and attach also to required list
             cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
             cardObj.SetCardData(data);
             RedrawCardsInPlayerZone();
@@ -355,7 +347,7 @@ namespace Cards
             // Create object
             var card = Instantiate(cardEnemyHandObjectPref, enemyHandZoneSpawnPoint.position, Quaternion.identity);
             card.transform.SetParent(enemyHandZone);
-            var cardObj = card.GetComponent<CardObjActive>();
+            var cardObj = card.GetComponent<CardObj>();
             AttachCardToEnemyList(cardObj);
             cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp); // attach pointers to card
             // Take data
@@ -364,12 +356,12 @@ namespace Cards
             enemyDeckAmount.text = enemyCardDeck.AmountCardsInDeckQueue().ToString();
             ReDrawCardsInHand(CardLocationType.EnemyHand);
         }
-        private void AddCardToEnemyPlayZone(CardDataCreature data)
+        private void AddCardToEnemyPlayZone(CardData data)
         {
             var card = Instantiate(cardCreatureObjectPref, enemyPlayZoneSpawnPoint.position, Quaternion.identity);
             card.transform.SetParent(enemyPlayZone);
-            var cardObj = card.GetComponent<CardObjCreature>();
-            AttachCardToEnemyList(cardObj); // give unique id in the session and attach also to required list
+            var cardObj = card.GetComponent<CardObj>();
+            AttachCardToEnemyZone(cardObj); // give unique id in the session and attach also to required list
             cardObj.SetPointerEvents(cardOnPointerEnter,cardOnPointerExit, cardOnPointerDown, cardOnPointerUp);
             cardObj.SetCardData(data);
             RedrawCardsInEnemyZone();
@@ -388,7 +380,7 @@ namespace Cards
             }
         }
         
-        private void AttachCardToList(CardObjActive cardObj)
+        private void AttachCardToList(CardObj cardObj)
         {
             cardObj.InitStage(CardLocationType.PlayerHand);
             cardObj.cardId = cardList.Count;
@@ -396,7 +388,8 @@ namespace Cards
             cardObj.cardIdInLocation = cardHandList.Count;
             cardHandList.Add(cardObj);
         }
-        private void AttachCardToList(CardObjCreature cardObj)
+        // Attach card to player Zone
+        private void AttachCardToZone(CardObj cardObj)
         {
             cardObj.InitStage(CardLocationType.PlayerZone);
             cardObj.cardId = cardList.Count;
@@ -404,7 +397,7 @@ namespace Cards
             cardObj.cardIdInLocation = cardPlayerList.Count;
             cardPlayerList.Add(cardObj);
         }
-        private void AttachCardToEnemyList(CardObjActive cardObj)
+        private void AttachCardToEnemyList(CardObj cardObj)
         {
             cardObj.InitStage(CardLocationType.EnemyHand);
             cardObj.cardId = cardList.Count;
@@ -412,7 +405,8 @@ namespace Cards
             cardObj.cardIdInLocation = cardEnemyHandList.Count;
             cardEnemyHandList.Add(cardObj);
         }
-        private void AttachCardToEnemyList(CardObjCreature cardObj)
+        // Attach card to Enemy Play zone
+        private void AttachCardToEnemyZone(CardObj cardObj)
         {
             cardObj.InitStage(CardLocationType.EnemyZone);
             cardObj.cardId = cardList.Count;
@@ -420,6 +414,8 @@ namespace Cards
             cardObj.cardIdInLocation = cardEnemyPlayList.Count;
             cardEnemyPlayList.Add(cardObj);
         }
+        
+
         #endregion
     }
 }

@@ -7,19 +7,18 @@ namespace Cards
 {
     public class CardDeck
     {
-        public readonly List<CardDataActive> cardActiveList = new List<CardDataActive>();
-        public readonly List<CardDataCreature> cardCreatureList = new List<CardDataCreature>();
+        public readonly List<CardData> cardDataList = new List<CardData>();
         public readonly List<CardDeck> decks = new List<CardDeck>();    // This field is only for client's global deck information. Because inside stored playable decks
         public string name; // Name of deck
-        private Queue<CardDataActive> cardQueue;
+        private Queue<CardData> cardQueue;
 
         public void PrepareCardQueue()
         {
-            var listOfThings = cardActiveList.OrderBy(i => Guid.NewGuid()).ToList();
-            cardQueue = new Queue<CardDataActive>(listOfThings);
+            var listOfThings = cardDataList.OrderBy(i => Guid.NewGuid()).ToList();
+            cardQueue = new Queue<CardData>(listOfThings);
         }
 
-        public CardDataActive TakeCardFromUp()
+        public CardData TakeCardFromUp()
         {
             return cardQueue.Dequeue();
         }
@@ -31,7 +30,7 @@ namespace Cards
 
         public int AmountCardsInDeck()
         {
-            return cardActiveList.Count + cardCreatureList.Count;
+            return cardDataList.Count;
         }
     }
 }

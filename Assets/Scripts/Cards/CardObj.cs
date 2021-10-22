@@ -20,10 +20,10 @@ namespace Cards
 
         #region CardDataFields
         [SerializeField] protected Text cardNameUI;
-        [SerializeField] protected Text cardPriceUI;
+        [SerializeField] protected Text cardIdUI;
+        [SerializeField] protected Text cardCostActionUI;
+        [SerializeField] protected Text cardCostManaUI;
         [HideInInspector] public CardData cardData;
-        [HideInInspector] public CardDataActive cardDataActive;
-        [HideInInspector] public CardDataCreature cardDataCreature;
         [HideInInspector] public CardLocationType locationType;
         [HideInInspector] public int cardId;    // id in spawn location
         [HideInInspector] public int cardIdInLocation;
@@ -33,16 +33,18 @@ namespace Cards
         [SerializeField] protected float enlargeYUpPoint;
         private int enlargePrevForegroundSiblingId;
         protected CardChangeTransformEnum enlargeStatus = CardChangeTransformEnum.Nothing;
-        protected Vector3 enlargePosTarget; // To what need to change
-        protected Vector3 enlargePosPrev;   // what was before the change
-        protected Quaternion enlargeAngleTarget; // target angle to what need to rotate
-        protected Quaternion enlargePrevAngle; // target angle to what need to rotate
-        protected Vector3 enlargeScaleTarget; // To what need to change
-        protected Vector3 enlargeScalePrev;   // what was before the change
+        private Vector3 enlargePosTarget; // To what need to change
+        private Vector3 enlargePosPrev;   // what was before the change
+        private Quaternion enlargeAngleTarget; // target angle to what need to rotate
+        private Quaternion enlargePrevAngle; // target angle to what need to rotate
+        private Vector3 enlargeScaleTarget; // To what need to change
+        private Vector3 enlargeScalePrev;   // what was before the change
         #endregion
         #region CardEffects
         [SerializeField] private Image selectionImage;
         [SerializeField] private Text amountInDeckText;
+        [SerializeField] private GameObject cardTypeManaUIGroup;
+        [SerializeField] private GameObject cardTypeSpellUIGroup;
         #endregion
 
         private Transform graveyardObj;
@@ -94,15 +96,24 @@ namespace Cards
         }
 
         #region CardDataOperations
-        public virtual void SetCardData(CardDataActive data)
-        {
-
-        }
-        public virtual void SetCardData(CardDataCreature data)
+        public void SetCardData(CardData data)
         {
             cardData = data;
             cardNameUI.text = cardData.name;
-            cardPriceUI.text = cardData.price.ToString();
+            cardIdUI.text = cardData.id.ToString();
+            cardCostActionUI.text = cardData.cost_action.ToString();
+            cardCostManaUI.text = cardData.cost_mana.ToString();
+            switch (cardData.cardType)
+            {
+                case CardType.Mana:
+                    cardTypeManaUIGroup.SetActive(true);
+                    break;
+                case CardType.Spell:
+                    cardTypeSpellUIGroup.SetActive(true);
+                    break;
+                default:
+                    break;
+            }
         }
         // Draw and represent all necessary staff for displaying to player amount available in deck
         public void SetAmountInDeck(int amount)
@@ -161,8 +172,43 @@ namespace Cards
             enlargeStatus = CardChangeTransformEnum.Down;
             transform.SetSiblingIndex(enlargePrevForegroundSiblingId);
         }
-        protected virtual void ChangeCardTransform()
-        { }
+
+        private void ChangeCardTransform()
+        {
+            // This function is called from Update.
+            var curTransform = gameObject.transform;
+            var localPos = curTransform.localPosition;
+            var localScale = curTransform.localScale;
+            var localRotation = curTransform.rotation;
+            var deltaTime = Time.deltaTime * 10;
+            Vector3 scaleTarget, posTarget;
+            Quaternion angleTarget;
+            if (enlargeStatus == CardChangeTransformEnum.Up)
+            {
+                scaleTarget = enlargeScaleTarget;
+                angleTarget = enlargeAngleTarget;
+                posTarget = enlargePosTarget;
+            }
+            else// if(enlargeStatus == CardChangeTransformEnum.Down)
+            {
+                scaleTarget = enlargeScalePrev;
+                angleTarget = enlargePrevAngle;
+                posTarget = enlargePosPrev;
+                // Check if already get to the point need do nothing
+                if (localRotation == angleTarget && localScale == scaleTarget && localPos == posTarget)
+                {
+                    enlargeStatus = CardChangeTransformEnum.Nothing;
+                    return; // Exit function
+                }
+            }
+
+            // Increase card above to display player
+            transform.localScale = Vector3.Lerp(localScale, scaleTarget, deltaTime);
+            // Update angle of card
+            transform.rotation = Quaternion.Lerp(localRotation, angleTarget, deltaTime);
+            // Move card above on the screen
+            transform.localPosition = Vector3.Lerp(localPos, posTarget, deltaTime);
+        }
         public void SetCardPosition(Vector3 newLocalPos, Quaternion newRotation)
         {
             // Target angle

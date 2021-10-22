@@ -5,14 +5,9 @@ using UnityEngine;
 
 namespace Cards
 {
-    [CreateAssetMenu(fileName = "New Active Card", menuName = "Cards/Active")]
-    public class CardScrObjActive : ScriptableObject
+    [CreateAssetMenu(fileName = "New Card", menuName = "Cards")]
+    public class CardScrObj : ScriptableObject
     {
-        public CardDataActive data;
-    }
-    [CreateAssetMenu(fileName = "New Creature Card", menuName = "Cards/Creature")]
-    public class CardScrObjCreature : ScriptableObject
-    {
-        public CardDataCreature data;
+        public CardData data;
     }
 }
