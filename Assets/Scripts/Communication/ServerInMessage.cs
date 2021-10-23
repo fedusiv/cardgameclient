@@ -69,11 +69,11 @@ namespace Communication
             foreach (var deck in decks)
             {
                 var name = deck.Value["name"].Value;
-                var deck_cards = body["cards"].AsObject;
+                var deck_cards = deck.Value["cards"];
                 var cardDeckDict = new Dictionary<int, int>();
-                foreach (var key in cards.Keys)
+                foreach (var key in deck_cards.Keys)
                 {
-                    cardDeckDict.Add(int.Parse(key), cards[key].AsInt);
+                    cardDeckDict.Add(int.Parse(key), deck_cards[key].AsInt);
                 }
                 decks_values.Add(cardDeckDict);
                 decks_names.Add(name);
