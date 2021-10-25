@@ -52,7 +52,7 @@ public class OperationHandler : MonoBehaviour
         // if data already received, just update already existing information
         clientData.UpdateClientData(msg.login, msg.cardDictionary);
         var deck = cardPool.CreatePlayerCardDeck(clientData.cardInfoDictionary, msg.decksCardDictionary, msg.decksNames);
-        clientData.UpdateClientFullCardDeck(deck);
+        clientData.UpdateClientFullCardDeck(deck);  // this method set clientData.clientFullDeck
         mainMenu.UpdateClientFullDeck(clientData.clientFullDeck);
     }
 

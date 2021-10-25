@@ -10,7 +10,5 @@ namespace Cards
         public int cost_action;
         public int cost_mana;
         public CardType cardType;
-        public int amountInDeck;
-        
     }
 }

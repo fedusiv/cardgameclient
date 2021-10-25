@@ -25,6 +25,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Button libraryNextPageButton;
     private bool deckManagerEnabled = false;
     private CardDeck clientFullDeck;
+    private CardDeck currentCardDeckToDisplay;  // store reference to deck, which should be shown now
     private readonly  List<CardObj> spawnedCardObjects = new List<CardObj>();
     private const int amountOfCardOnOnePage = 12;
     private int currentPageId, amountOfPages;   // page id and amount of all pages for current tab or any other filter stuff
@@ -71,6 +72,7 @@ public class MainMenu : MonoBehaviour
     public void UpdateClientFullDeck(CardDeck deck)
     {
         clientFullDeck = deck;
+        currentCardDeckToDisplay = clientFullDeck;
         SpawnAllCardObjects();
     }
 
@@ -107,7 +109,17 @@ public class MainMenu : MonoBehaviour
         {
             var card = listToOperate[i];
             card.transform.SetParent(deckLibraryGridUI.transform);
-            card.SetAmountInDeck(card.cardData.amountInDeck);
+            if (currentDeckOnEditIndex == -1)
+            {
+                // no deck chosen, just display full amount of cards
+                card.SetAmountInDeck(clientFullDeck.cardAmountInDeck[card.cardData]);
+            }
+            else
+            {
+                card.SetAmountInDeck(clientFullDeck.cardAmountInDeck[card.cardData] -
+                                    clientFullDeck.decks[currentDeckOnEditIndex]
+                                         .cardAmountInDeck[card.cardData]); // display how many card available
+            }
             displayedCards.Add(card);
         }
         
@@ -189,7 +201,7 @@ public class MainMenu : MonoBehaviour
             {
                 var cardDeck = Instantiate(cardInDeckElementPref, cardsNamesListInDeckTransfromPoint, false)
                     .GetComponent<DeckCardElement>();
-                cardDeck.SetCardData(card.name,card.cost_mana,card.amountInDeck);
+                cardDeck.SetCardData(card.name,card.cost_mana,deck.cardAmountInDeck[card]);
                 var index = displayedCardDeckElements.Count;
                 cardDeck.removeButton.onClick.AddListener(delegate { OnCardInDeckRemoveButtonPressed(index);});
                 displayedCardDeckElements.Add(cardDeck);
@@ -237,7 +249,7 @@ public class MainMenu : MonoBehaviour
             displayedDeckElements[currentDeckOnEditIndex].MarkAsSaved();
             currentDeckOnEditIndex = -1;
         }
-
+        FillDeckLibrary();
     }
 
     private void OnCardInDeckRemoveButtonPressed(int id)

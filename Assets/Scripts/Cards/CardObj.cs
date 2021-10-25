@@ -123,9 +123,15 @@ namespace Cards
                 amountInDeckText.text = "x" + amount.ToString();
                 amountInDeckText.enabled = true;
             }
-            else
+            else if(amount == 1)
             {
                 amountInDeckText.enabled = false;
+            }
+            else
+            {
+                // amount less or equl 0
+                amountInDeckText.text = "All used";
+                amountInDeckText.enabled = true;
             }
         }
         #endregion

@@ -58,8 +58,8 @@ namespace Cards
                 if (cardData != null)
                 {
                     // Found
-                    cardData.amountInDeck = cardDict[key];
                     cardDeck.cardDataList.Add(cardData);
+                    cardDeck.cardAmountInDeck.Add(cardData,cardDict[key]);  // get amount of cards
                 }
             }
 
